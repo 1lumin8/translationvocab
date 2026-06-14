@@ -57,6 +57,15 @@ function clusterKey(card) {
   ) {
     return "shincheonji-church-name";
   }
+  if (
+    combined.includes("요한계시록") ||
+    combined.includes("신약계시록") ||
+    combined === "계시록thebookofrevelation" ||
+    combined === "요한계시록revelation" ||
+    combined === "요한계시록bookofrevelation"
+  ) {
+    return "book-of-revelation";
+  }
   return cardKey(card);
 }
 
