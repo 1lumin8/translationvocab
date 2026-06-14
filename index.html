@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Translation Vocab Cards</title>
+    <link rel="stylesheet" href="styles.css?v=scrollable-answers" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Korean-English glossary practice</p>
+          <h1 id="page-title">Translation Vocab Cards</h1>
+          <p class="intro">
+            Generate a fresh set of 10 study cards mixed from the glossary tabs,
+            excluding README and Master.
+          </p>
+        </div>
+        <div class="hero-actions">
+          <button class="primary-action" id="generate" type="button">
+            Generate 10 cards
+          </button>
+          <button class="secondary-action" id="show-all" type="button">
+            Reveal all
+          </button>
+        </div>
+      </section>
+
+      <section class="toolbar" aria-label="Study controls">
+        <div>
+          <span class="label">Card direction</span>
+          <div class="segmented" role="group" aria-label="Card direction">
+            <button class="segment active" data-direction="ko-en" type="button">
+              Korean to English
+            </button>
+            <button class="segment" data-direction="en-ko" type="button">
+              English to Korean
+            </button>
+          </div>
+        </div>
+        <div class="stats" aria-live="polite">
+          <span id="card-count">10 cards</span>
+          <span id="tab-count">9 tabs</span>
+        </div>
+      </section>
+
+      <section class="tab-panel" aria-label="Tab selection">
+        <div class="tab-actions">
+          <button class="mini-action" id="select-all-tabs" type="button">
+            Select all tabs
+          </button>
+          <button class="mini-action" id="deselect-all-tabs" type="button">
+            Deselect all tabs
+          </button>
+        </div>
+        <div class="tab-filter" aria-label="Included tabs" id="tab-filter"></div>
+      </section>
+
+      <section class="cards-grid" id="cards" aria-live="polite"></section>
+    </main>
+
+    <script src="cards.js?v=tab-bulk-actions"></script>
+    <script src="app.js?v=tab-bulk-actions"></script>
+  </body>
+</html>
