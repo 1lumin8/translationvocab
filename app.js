@@ -7,6 +7,7 @@ const tabFilterEl = document.querySelector("#tab-filter");
 const cardCountEl = document.querySelector("#card-count");
 const tabCountEl = document.querySelector("#tab-count");
 const directionButtons = [...document.querySelectorAll("[data-direction]")];
+const difficultyButtons = [...document.querySelectorAll("[data-difficulty]")];
 
 const INVALID_TERMS = new Set([
   "Korean",
@@ -26,6 +27,7 @@ const studyCards = rawCards.filter((card) => {
 const allTabs = [...new Set(studyCards.map((card) => card.tab))];
 let activeTabs = new Set(allTabs);
 let direction = "ko-en";
+let difficulty = "all";
 let currentCards = [];
 let previousCardKeys = new Set();
 
@@ -69,8 +71,58 @@ function clusterKey(card) {
   return cardKey(card);
 }
 
+function difficultyScore(card) {
+  const koreanLength = [...card.korean].length;
+  const englishLength = card.english.length;
+  const combined = normalizeKey(`${card.tab} ${card.type} ${card.korean} ${card.english}`);
+  let score = 0;
+
+  if (koreanLength <= 4 && englishLength <= 28) {
+    score += 0;
+  } else if (koreanLength <= 9 && englishLength <= 70) {
+    score += 1;
+  } else {
+    score += 2;
+  }
+
+  if (
+    combined.includes("idiom") ||
+    combined.includes("phrase") ||
+    combined.includes("rhetorical") ||
+    combined.includes("organization") ||
+    combined.includes("doctrinal") ||
+    combined.includes("prayer")
+  ) {
+    score += 1;
+  }
+
+  if (card.tab === "Phrases" || card.tab === "SCJ Organization") {
+    score += 1;
+  }
+
+  return Math.min(score, 3);
+}
+
+function matchesDifficulty(card) {
+  const score = difficultyScore(card);
+  if (difficulty === "easy") {
+    return score <= 1;
+  }
+  if (difficulty === "medium") {
+    return score === 2;
+  }
+  if (difficulty === "hard") {
+    return score >= 3;
+  }
+  return true;
+}
+
 function sampleCards() {
-  const candidates = shuffle(studyCards.filter((card) => activeTabs.has(card.tab)));
+  const filteredCards = studyCards.filter(
+    (card) => activeTabs.has(card.tab) && matchesDifficulty(card)
+  );
+  const fallbackCards = studyCards.filter((card) => activeTabs.has(card.tab));
+  const candidates = shuffle(filteredCards.length >= 10 ? filteredCards : fallbackCards);
   const selected = [];
   const selectedKeys = new Set();
   const selectedClusters = new Set();
@@ -243,6 +295,16 @@ directionButtons.forEach((button) => {
   button.addEventListener("click", () => {
     direction = button.dataset.direction;
     directionButtons.forEach((item) => item.classList.toggle("active", item === button));
+    renderCards();
+  });
+});
+
+difficultyButtons.forEach((button) => {
+  button.addEventListener("click", () => {
+    difficulty = button.dataset.difficulty;
+    difficultyButtons.forEach((item) => item.classList.toggle("active", item === button));
+    previousCardKeys = new Set();
+    sampleCards();
     renderCards();
   });
 });

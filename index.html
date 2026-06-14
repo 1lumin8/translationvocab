@@ -39,6 +39,23 @@
             </button>
           </div>
         </div>
+        <div>
+          <span class="label">Difficulty</span>
+          <div class="segmented" role="group" aria-label="Difficulty">
+            <button class="segment active" data-difficulty="all" type="button">
+              All levels
+            </button>
+            <button class="segment" data-difficulty="easy" type="button">
+              Easy
+            </button>
+            <button class="segment" data-difficulty="medium" type="button">
+              Medium
+            </button>
+            <button class="segment" data-difficulty="hard" type="button">
+              Hard
+            </button>
+          </div>
+        </div>
         <div class="stats" aria-live="polite">
           <span id="card-count">10 cards</span>
           <span id="tab-count">9 tabs</span>
@@ -60,7 +77,7 @@
       <section class="cards-grid" id="cards" aria-live="polite"></section>
     </main>
 
-    <script src="cards.js?v=revelation-cluster"></script>
-    <script src="app.js?v=revelation-cluster"></script>
+    <script src="cards.js?v=difficulty-levels"></script>
+    <script src="app.js?v=difficulty-levels"></script>
   </body>
 </html>
