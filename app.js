@@ -30,6 +30,8 @@ let direction = "ko-en";
 let difficulty = "all";
 let currentCards = [];
 let previousCardKeys = new Set();
+let deckQueue = [];
+let deckSignature = "";
 
 function shuffle(items) {
   const shuffled = [...items];
@@ -117,17 +119,39 @@ function matchesDifficulty(card) {
   return true;
 }
 
-function sampleCards() {
+function getActivePool() {
   const filteredCards = studyCards.filter(
     (card) => activeTabs.has(card.tab) && matchesDifficulty(card)
   );
   const fallbackCards = studyCards.filter((card) => activeTabs.has(card.tab));
-  const candidates = shuffle(filteredCards.length >= 10 ? filteredCards : fallbackCards);
+  return filteredCards.length >= 10 ? filteredCards : fallbackCards;
+}
+
+function getDeckSignature() {
+  return `${[...activeTabs].sort().join("|")}::${difficulty}`;
+}
+
+function refreshDeck(force = false) {
+  const signature = getDeckSignature();
+  if (!force && signature === deckSignature && deckQueue.length >= 10) {
+    return;
+  }
+
+  const recent = new Set([...previousCardKeys, ...currentCards.map(cardKey)]);
+  const pool = getActivePool();
+  const fresh = pool.filter((card) => !recent.has(cardKey(card)));
+  deckQueue = shuffle(fresh.length >= 10 ? fresh : pool);
+  deckSignature = signature;
+}
+
+function sampleCards() {
+  refreshDeck();
   const selected = [];
   const selectedKeys = new Set();
   const selectedClusters = new Set();
 
-  for (const card of candidates) {
+  while (deckQueue.length && selected.length < 10) {
+    const card = deckQueue.shift();
     if (selected.length === 10) {
       break;
     }
@@ -148,7 +172,9 @@ function sampleCards() {
   }
 
   if (selected.length < 10) {
-    for (const card of candidates) {
+    refreshDeck(true);
+    while (deckQueue.length && selected.length < 10) {
+      const card = deckQueue.shift();
       if (selected.length === 10) {
         break;
       }
@@ -167,6 +193,13 @@ function sampleCards() {
 
   currentCards = selected;
   previousCardKeys = new Set(currentCards.map(cardKey));
+}
+
+function resetDeckAndSample() {
+  deckQueue = [];
+  deckSignature = "";
+  previousCardKeys = new Set();
+  sampleCards();
 }
 
 function syncTabButtons() {
@@ -270,7 +303,7 @@ function renderTabs() {
         activeTabs.add(tab);
       }
       syncTabButtons();
-      sampleCards();
+      resetDeckAndSample();
       renderCards();
     });
   });
@@ -279,7 +312,7 @@ function renderTabs() {
 selectAllTabsButton.addEventListener("click", () => {
   activeTabs = new Set(allTabs);
   syncTabButtons();
-  sampleCards();
+  resetDeckAndSample();
   renderCards();
 });
 
@@ -287,6 +320,8 @@ deselectAllTabsButton.addEventListener("click", () => {
   activeTabs = new Set();
   currentCards = [];
   previousCardKeys = new Set();
+  deckQueue = [];
+  deckSignature = "";
   syncTabButtons();
   renderCards();
 });
@@ -303,8 +338,7 @@ difficultyButtons.forEach((button) => {
   button.addEventListener("click", () => {
     difficulty = button.dataset.difficulty;
     difficultyButtons.forEach((item) => item.classList.toggle("active", item === button));
-    previousCardKeys = new Set();
-    sampleCards();
+    resetDeckAndSample();
     renderCards();
   });
 });
